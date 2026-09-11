@@ -1,0 +1,15 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+dist/
+build/
+*.egg-info/
+.localrag/
+*.log
+.DS_Store
+Thumbs.db
