@@ -1,0 +1,88 @@
+name: 🐛 Bug Report
+description: Report unexpected behavior, retrieval errors, or system crashes in localrag-kit.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue in **localrag-kit**!
+        Please verify you are running the latest version before submitting.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear, concise description of what the bug is.
+      placeholder: When running `localrag query ...`, the system fails with ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide the exact CLI command or Python code snippet used.
+      placeholder: |
+        1. Initialize store: `localrag init`
+        2. Ingest document: `localrag ingest ./docs/manual.pdf`
+        3. Execute query: `localrag query "summarize section 2"`
+    validations:
+      required: true
+
+  - type: dropdown
+    id: embedding-model
+    attributes:
+      label: Embedding Model / Backend
+      description: Which embedding provider or model was in use?
+      options:
+        - sentence-transformers (default: all-MiniLM-L6-v2)
+        - Ollama Embeddings
+        - HuggingFace Local
+        - Custom / Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: llm-backend
+    attributes:
+      label: LLM Provider
+      description: Which local inference provider was active?
+      options:
+        - Ollama (e.g., llama3, mistral)
+        - llama.cpp / GGUF
+        - vLLM
+        - None (Embedding/Retrieval-only)
+        - Other
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment & Hardware
+      description: What OS, Python version, and hardware are you running?
+      placeholder: |
+        - OS: Windows 11 / Ubuntu 24.04 / macOS Sequoia
+        - Python Version: 3.11.8
+        - Hardware: Apple M2 / NVIDIA RTX 4070 / Intel i7 (CPU only)
+        - RAM: 16 GB
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal Traceback / Logs
+      description: Paste any error tracebacks or verbose CLI logs here.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I verified that the issue persists on the latest `main` branch.
+          required: true
+        - label: I confirmed my hardware meets minimum RAM requirements for the chosen model.
+          required: true
+        - label: No private credentials or proprietary data are included in this report.
+          required: true

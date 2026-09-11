@@ -1,0 +1,40 @@
+name: 💡 Feature Request
+description: Propose an enhancement, new parser, or CLI feature for localrag-kit.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome feature ideas that uphold our core philosophy: **100% Offline, Zero Cloud Telemetry, High Precision**.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem or workflow limitation?
+      placeholder: I am currently unable to ingest EPUB or LaTeX documents without pre-converting them...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe what you want to happen and how it should integrate into localrag-kit.
+      placeholder: Add a native parser under `localrag/parsers/` that extracts text from ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Approaches
+      description: What other workarounds or libraries have you considered?
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Implementation
+      options:
+        - label: I am interested in opening a Pull Request to implement this feature.

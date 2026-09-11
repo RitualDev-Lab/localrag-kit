@@ -1,0 +1,44 @@
+name: 🧠 Model / Provider Support Request
+description: Propose support for a new offline embedding model, vector index, or local inference engine.
+title: "[Provider Support]: "
+labels: ["provider", "ai-models"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        LocalRAG-Kit aims to run seamlessly with the best open-weights models and local runtimes.
+
+  - type: dropdown
+    id: provider-category
+    attributes:
+      label: Category
+      options:
+        - Local Embedding Model (e.g. BGE-M3, Nomic-Embed, GTE)
+        - Local LLM Runtime (e.g. llama.cpp, ExLlamaV2, MLC-LLM)
+        - Vector Storage Backend (e.g. LanceDB, Qdrant Local, DuckDB VSS)
+        - Document Parser (e.g. Docx, EPUB, Audio-Transcription)
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: model-name
+    attributes:
+      label: Model or Framework Identifier
+      placeholder: BAAI/bge-m3 / llama-cpp-python / etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why should this be supported?
+      description: Explain the benefits (e.g. lower memory footprint, multi-lingual support, speed benchmarks).
+    validations:
+      required: true
+
+  - type: textarea
+    id: documentation-links
+    attributes:
+      label: Relevant Links & Documentation
+      placeholder: HuggingFace model card, GitHub repo, or benchmark links.

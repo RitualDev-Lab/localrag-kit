@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions & Questions
+    url: https://github.com/RitualDev-Lab/localrag-kit/discussions
+    about: Ask implementation questions, share use cases, or discuss local LLM performance.
+  - name: 🌐 RitualDev Studio Portal
+    url: https://ritualdev.in/open-source
+    about: Learn more about our offline-first systems architecture.
+  - name: 🔒 Report a Security Vulnerability
+    url: https://github.com/RitualDev-Lab/localrag-kit/security/policy
+    about: Privately report a security sensitivity or vulnerability.
