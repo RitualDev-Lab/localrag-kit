@@ -71,6 +71,16 @@ def main():
     stats_parser = subparsers.add_parser("stats", help="Show index and database statistics")
     stats_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
 
+    # Command: serve (FastAPI Web Server)
+    serve_parser = subparsers.add_parser("serve", help="Start the local FastAPI REST & Web interface server")
+    serve_parser.add_argument("path", nargs="?", default=".", help="Workspace path to serve (default: current directory)")
+    serve_parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
+    serve_parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
+    serve_parser.add_argument("--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)")
+    serve_parser.add_argument("--model", help="LLM model name")
+    serve_parser.add_argument("--embed", default="fast", choices=["auto", "fast", "ollama", "openai"], help="Embedding backend (default: fast)")
+    serve_parser.add_argument("--open", action="store_true", help="Automatically open browser")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -302,6 +312,34 @@ def main():
             table.add_row("Database File Size", f"{size_mb:.2f} MB ({stats.database_size_bytes:,} bytes)")
 
             console.print(table)
+
+    elif args.command == "serve":
+        target_path = Path(args.path).resolve()
+        db_path = get_default_db_path(target_path)
+
+        console.print(Panel(
+            f"[bold cyan]LocalRAG-Kit FastAPI Server[/bold cyan]\n"
+            f"[dim]Workspace:[/dim] [yellow]{target_path}[/yellow]\n"
+            f"[dim]API URL:[/dim] [bold green]http://{args.host}:{args.port}/api[/bold green]\n"
+            f"[dim]Interactive Docs:[/dim] [cyan]http://{args.host}:{args.port}/docs[/cyan]",
+            border_style="cyan"
+        ))
+
+        import uvicorn
+        from localrag.server.app import create_app
+
+        app = create_app(
+            workspace_path=target_path,
+            db_path=db_path,
+            embed_provider_name=args.embed,
+            llm_provider_name=args.llm,
+        )
+
+        if args.open:
+            import webbrowser
+            webbrowser.open(f"http://{args.host}:{args.port}")
+
+        uvicorn.run(app, host=args.host, port=args.port, log_level="info")
 
 
 if __name__ == "__main__":
