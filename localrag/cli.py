@@ -58,6 +58,15 @@ def main():
     search_parser.add_argument("--mode", choices=["bm25", "vector"], default="bm25", help="Search algorithm (default: bm25)")
     search_parser.add_argument("--limit", type=int, default=5, help="Number of results (default: 5)")
 
+    # Command: ask (Grounded Hybrid RAG)
+    ask_parser = subparsers.add_parser("ask", help="Ask a question grounded in local files with cited sources")
+    ask_parser.add_argument("query", help="Question to ask")
+    ask_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
+    ask_parser.add_argument("--mode", choices=["hybrid", "bm25", "vector"], default="hybrid", help="Retrieval algorithm (default: hybrid)")
+    ask_parser.add_argument("--top-k", type=int, default=5, help="Number of chunks to synthesize (default: 5)")
+    ask_parser.add_argument("--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)")
+    ask_parser.add_argument("--model", help="LLM model name (e.g. qwen3.5:4b, llama3.2)")
+
     # Command: stats
     stats_parser = subparsers.add_parser("stats", help="Show index and database statistics")
     stats_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
@@ -219,6 +228,57 @@ def main():
                     title=f"Result #{i} [{chunk.id}]",
                     border_style="cyan"
                 ))
+
+    elif args.command == "ask":
+        target_path = Path(args.path).resolve()
+        db_path = get_default_db_path(target_path)
+        if not db_path.exists():
+            console.print(f"[bold red]Error:[/bold red] No index database found at: {db_path}")
+            console.print("Run [yellow]localrag index[/yellow] first to build the index.")
+            sys.exit(1)
+
+        from localrag.providers import get_embedding_provider, get_llm_provider
+        from localrag.retrieval import RAGOrchestrator
+
+        embed_provider = get_embedding_provider("fast")
+        llm_provider = get_llm_provider(provider_type=args.llm, model=args.model)
+
+        with SQLiteStore(db_path) as store:
+            orchestrator = RAGOrchestrator(
+                store=store,
+                embedding_provider=embed_provider,
+                llm_provider=llm_provider,
+            )
+
+            console.print(Panel(
+                f"[bold cyan]LocalRAG Question Answerer[/bold cyan]\n"
+                f"[dim]Query:[/dim] [yellow]{args.query}[/yellow]\n"
+                f"[dim]Retrieval Mode:[/dim] [green]{args.mode}[/green] | [dim]LLM:[/dim] [cyan]{llm_provider.model_name}[/cyan]",
+                border_style="cyan"
+            ))
+
+            citations_list = []
+
+            def on_citations(citations):
+                citations_list.extend(citations)
+
+            console.print("\n[bold magenta]Generated Answer:[/bold magenta]")
+            tokens = []
+            for tok in orchestrator.stream_ask(
+                query=args.query,
+                top_k=args.top_k,
+                mode=args.mode,
+                citations_callback=on_citations,
+            ):
+                console.print(tok, end="")
+                tokens.append(tok)
+            console.print("\n")
+
+            if citations_list:
+                console.print("[bold cyan]Cited Local Sources:[/bold cyan]")
+                for c in citations_list:
+                    sec = f" ({c.section_title})" if c.section_title else ""
+                    console.print(f"  [green]•[/green] [bold yellow][Source #{c.source_index}][/bold yellow] [white]{c.relative_path}:{c.start_line}-{c.end_line}[/white]{sec} [dim](score: {c.score:.4f})[/dim]")
 
     elif args.command == "stats":
         target_path = Path(args.path).resolve()
