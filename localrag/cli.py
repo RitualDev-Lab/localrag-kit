@@ -47,11 +47,15 @@ def main():
     index_parser = subparsers.add_parser("index", help="Index or incrementally update database for a directory")
     index_parser.add_argument("path", nargs="?", default=".", help="Target folder path (default: current directory)")
     index_parser.add_argument("--full", action="store_true", help="Force full re-index instead of incremental")
+    index_parser.add_argument("--embed", action="store_true", help="Generate dense vector embeddings for semantic search")
+    index_parser.add_argument("--embed-provider", default="auto", choices=["auto", "fast", "ollama", "openai"], help="Embedding backend (default: auto)")
+    index_parser.add_argument("--embed-model", help="Embedding model name (e.g. nomic-embed-text, bge-m3)")
 
-    # Command: search (keyword BM25)
-    search_parser = subparsers.add_parser("search", help="Execute fast keyword search (BM25) on indexed store")
+    # Command: search (keyword BM25 or Vector)
+    search_parser = subparsers.add_parser("search", help="Search indexed database (BM25 keyword or vector semantic)")
     search_parser.add_argument("query", help="Search query string")
     search_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
+    search_parser.add_argument("--mode", choices=["bm25", "vector"], default="bm25", help="Search algorithm (default: bm25)")
     search_parser.add_argument("--limit", type=int, default=5, help="Number of results (default: 5)")
 
     # Command: stats
@@ -140,6 +144,14 @@ def main():
         ))
 
         pipeline = IngestionPipeline(target_path)
+        embed_provider = None
+        if args.embed:
+            from localrag.providers import get_embedding_provider
+            embed_provider = get_embedding_provider(
+                provider_type=args.embed_provider,
+                model=args.embed_model,
+            )
+            console.print(f"[dim]Embeddings enabled:[/dim] [cyan]{embed_provider.name}[/cyan] ({embed_provider.dimension} dims)")
 
         with SQLiteStore(db_path) as store:
             with Progress(
@@ -157,6 +169,7 @@ def main():
                 stats = pipeline.index_to_store(
                     store,
                     incremental=not args.full,
+                    embedding_provider=embed_provider,
                     progress_callback=on_progress,
                 )
 
@@ -182,13 +195,19 @@ def main():
             sys.exit(1)
 
         with SQLiteStore(db_path) as store:
-            results = store.search_bm25(args.query, limit=args.limit)
+            if args.mode == "vector":
+                from localrag.providers import get_embedding_provider
+                embed_provider = get_embedding_provider("fast")
+                query_vec = embed_provider.embed_text(args.query)
+                results = store.search_vector(query_vec, limit=args.limit)
+            else:
+                results = store.search_bm25(args.query, limit=args.limit)
 
             if not results:
                 console.print(f"[yellow]No matching chunks found for query:[/yellow] '{args.query}'")
                 return
 
-            console.print(f"\n[bold green]Found {len(results)} matching chunks for:[/bold green] [italic cyan]'{args.query}'[/italic cyan]\n")
+            console.print(f"\n[bold green]Found {len(results)} matching chunks for:[/bold green] [italic cyan]'{args.query}'[/italic cyan] [dim](Mode: {args.mode})[/dim]\n")
             for i, r in enumerate(results, start=1):
                 chunk = r.chunk
                 console.print(Panel(

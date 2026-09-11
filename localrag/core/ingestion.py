@@ -82,11 +82,13 @@ class IngestionPipeline:
         self,
         store: SQLiteStore,
         incremental: bool = True,
+        embedding_provider: Optional["BaseEmbeddingProvider"] = None,
         progress_callback: Optional[Callable[[FileMetadata, int, int], None]] = None,
     ) -> IndexingStats:
         """
         Harvest files and write them to SQLiteStore with FTS5 and vector tables.
         If incremental=True, only modified/new files are re-chunked, and deleted files are purged.
+        If embedding_provider is provided, generates dense float vectors for chunks.
         """
         files = self.harvester.harvest()
         stats = IndexingStats(total_files_scanned=len(files))
@@ -112,6 +114,13 @@ class IngestionPipeline:
             try:
                 doc = self.parser_registry.parse(meta)
                 chunks = self.chunker_registry.chunk_document(doc)
+
+                # Compute dense embeddings if provider enabled
+                if embedding_provider and chunks:
+                    chunk_texts = [c.text for c in chunks]
+                    embeddings = embedding_provider.embed_batch(chunk_texts)
+                    for c, emb in zip(chunks, embeddings):
+                        c.embedding = emb
 
                 # Upsert file record
                 store.upsert_file(meta)
