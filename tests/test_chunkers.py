@@ -1,9 +1,9 @@
 """Tests for structure-aware, markdown, and code chunkers."""
 
+from localrag.core.chunkers import ChunkerRegistry
 from localrag.core.chunkers.code import CodeChunker
 from localrag.core.chunkers.markdown import MarkdownChunker
 from localrag.core.chunkers.sliding_window import SlidingWindowChunker
-from localrag.core.chunkers import ChunkerRegistry
 from localrag.core.models import Document, FileMetadata, FileType
 
 

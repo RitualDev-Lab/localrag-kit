@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.harvester import FileHarvester
 from localrag.core.models import FileType
 
@@ -17,7 +18,7 @@ def test_harvester_discovers_supported_files():
         (root / "src" / "utils.ts").write_text("export const add = (a: number, b: number) => a + b;")
         (root / "docs").mkdir()
         (root / "docs" / "page.html").write_text("<html><body><h1>Hello</h1></body></html>")
-        
+
         # Ignored files
         (root / ".git").mkdir()
         (root / ".git" / "config").write_text("[core]")

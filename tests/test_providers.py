@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.ingestion import IngestionPipeline
 from localrag.providers import (
     FastFeatureEmbeddingProvider,

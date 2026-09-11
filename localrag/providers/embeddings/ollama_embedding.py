@@ -1,10 +1,9 @@
 """Ollama local embedding provider connecting to local Ollama daemon."""
 
-from typing import List, Optional
 import httpx
+
 from localrag.providers.base import BaseEmbeddingProvider
 from localrag.storage.vector_ops import normalize_vector
-
 
 DEFAULT_OLLAMA_EMBED_MODEL = "nomic-embed-text"
 KNOWN_DIMENSIONS = {
@@ -47,19 +46,18 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
                     models = res.json().get("models", [])
                     target = self.model.lower()
                     return any(
-                        target in m.get("name", "").lower() or target in m.get("model", "").lower()
-                        for m in models
+                        target in m.get("name", "").lower() or target in m.get("model", "").lower() for m in models
                     )
                 return False
         except Exception:
             return False
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         """Generate embedding vector for a single text."""
         batch_res = self.embed_batch([text])
         return batch_res[0] if batch_res else [0.0] * self._dim
 
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Batch embedding request using Ollama's /api/embed endpoint (or fallback to /api/embeddings)."""
         if not texts:
             return []
@@ -81,7 +79,7 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
             pass
 
         # Fallback to single-item /api/embeddings loop
-        results: List[List[float]] = []
+        results: list[list[float]] = []
         with httpx.Client(timeout=self.timeout) as client:
             for text in texts:
                 try:

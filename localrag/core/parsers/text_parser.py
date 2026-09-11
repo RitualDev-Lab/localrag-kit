@@ -3,6 +3,7 @@
 import html
 import re
 from pathlib import Path
+
 from localrag.core.models import Document, FileMetadata, FileType
 from localrag.core.parsers.base import BaseParser
 

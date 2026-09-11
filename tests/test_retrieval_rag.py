@@ -2,15 +2,18 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.models import Chunk, ChunkMetadata, FileMetadata, FileType
 from localrag.providers import FastFeatureEmbeddingProvider, MockLLMProvider
 from localrag.retrieval.orchestrator import RAGOrchestrator
 from localrag.retrieval.rrf import reciprocal_rank_fusion
 from localrag.retrieval.synthesizer import ContextSynthesizer
-from localrag.storage.sqlite_store import SQLiteStore, SearchResult
+from localrag.storage.sqlite_store import SearchResult, SQLiteStore
 
 
-def _make_dummy_chunk(chunk_id: str, text: str, rel_path: str = "main.py", start_line: int = 1, end_line: int = 10) -> Chunk:
+def _make_dummy_chunk(
+    chunk_id: str, text: str, rel_path: str = "main.py", start_line: int = 1, end_line: int = 10
+) -> Chunk:
     return Chunk(
         text=text,
         metadata=ChunkMetadata(
@@ -62,7 +65,7 @@ def test_context_synthesizer_dedup_and_budget():
         SearchResult(chunk=chunk1, score=1.0, match_type="hybrid"),
         SearchResult(chunk=chunk1_duplicate, score=0.9, match_type="hybrid"),  # Same line range -> should deduplicate
         SearchResult(chunk=chunk2, score=0.8, match_type="hybrid"),
-        SearchResult(chunk=huge_chunk, score=0.7, match_type="hybrid"),        # Exceeds token budget -> should skip
+        SearchResult(chunk=huge_chunk, score=0.7, match_type="hybrid"),  # Exceeds token budget -> should skip
     ]
 
     ctx = synthesizer.synthesize(results)
@@ -123,12 +126,14 @@ def test_rag_orchestrator_end_to_end():
 
             # Test streaming stream_ask()
             received_citations = []
-            tokens = list(orchestrator.stream_ask(
-                query="How does JWT verification work?",
-                top_k=3,
-                mode="hybrid",
-                citations_callback=lambda c: received_citations.extend(c),
-            ))
+            tokens = list(
+                orchestrator.stream_ask(
+                    query="How does JWT verification work?",
+                    top_k=3,
+                    mode="hybrid",
+                    citations_callback=lambda c: received_citations.extend(c),
+                )
+            )
             assert len(received_citations) >= 1
             assert len(tokens) > 2
             assert "".join(tokens) == response.answer

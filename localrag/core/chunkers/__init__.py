@@ -1,6 +1,7 @@
 """Chunker registry and automatic format dispatching."""
 
 from typing import Dict, List, Optional
+
 from localrag.core.chunkers.base import BaseChunker
 from localrag.core.chunkers.code import CodeChunker
 from localrag.core.chunkers.markdown import MarkdownChunker
@@ -16,7 +17,7 @@ class ChunkerRegistry:
         self.code_chunker = CodeChunker()
         self.default_chunker = SlidingWindowChunker()
 
-    def chunk_document(self, document: Document) -> List[Chunk]:
+    def chunk_document(self, document: Document) -> list[Chunk]:
         """Chunk a document according to its file type."""
         file_type = document.metadata.file_type
 
@@ -33,8 +34,8 @@ class ChunkerRegistry:
 
 __all__ = [
     "BaseChunker",
-    "SlidingWindowChunker",
-    "MarkdownChunker",
-    "CodeChunker",
     "ChunkerRegistry",
+    "CodeChunker",
+    "MarkdownChunker",
+    "SlidingWindowChunker",
 ]

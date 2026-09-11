@@ -2,8 +2,10 @@
 
 import json
 import os
-from typing import Iterator, Optional
+from collections.abc import Iterator
+
 import httpx
+
 from localrag.providers.base import BaseLLMProvider
 
 
@@ -13,7 +15,7 @@ class OpenAILLMProvider(BaseLLMProvider):
     def __init__(
         self,
         model: str = "gpt-4o-mini",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         base_url: str = "https://api.openai.com/v1",
         timeout: float = 60.0,
     ):
@@ -32,7 +34,7 @@ class OpenAILLMProvider(BaseLLMProvider):
     def generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> str:
@@ -41,7 +43,7 @@ class OpenAILLMProvider(BaseLLMProvider):
     def stream_generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> Iterator[str]:
@@ -68,7 +70,9 @@ class OpenAILLMProvider(BaseLLMProvider):
 
         try:
             with httpx.Client(timeout=self.timeout) as client:
-                with client.stream("POST", f"{self.base_url}/chat/completions", headers=headers, json=payload) as response:
+                with client.stream(
+                    "POST", f"{self.base_url}/chat/completions", headers=headers, json=payload
+                ) as response:
                     if response.status_code != 200:
                         yield f"[API Error: Status {response.status_code}]"
                         return

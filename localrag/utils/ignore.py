@@ -1,10 +1,8 @@
 """Ignore pattern matcher supporting .gitignore and .ragignore with built-in defaults."""
 
-import os
 from pathlib import Path
-from typing import List, Optional
-import pathspec
 
+import pathspec
 
 DEFAULT_IGNORE_PATTERNS = [
     # VCS & Package Managers
@@ -83,7 +81,7 @@ DEFAULT_IGNORE_PATTERNS = [
 class IgnoreFilter:
     """Evaluates whether a relative file path should be ignored during indexing."""
 
-    def __init__(self, root_dir: str | Path, custom_patterns: Optional[List[str]] = None):
+    def __init__(self, root_dir: str | Path, custom_patterns: list[str] | None = None):
         self.root_dir = Path(root_dir).resolve()
         patterns = list(DEFAULT_IGNORE_PATTERNS)
 
@@ -116,7 +114,7 @@ class IgnoreFilter:
         normalized = relative_path.replace("\\", "/")
         if not normalized:
             return False
-        
+
         # Check parent folder segments
         parts = normalized.split("/")
         for i in range(1, len(parts)):

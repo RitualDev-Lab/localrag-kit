@@ -2,7 +2,12 @@
 
 import tempfile
 from pathlib import Path
-from localrag.utils.hasher import compute_content_sha256, compute_file_sha256, generate_chunk_id
+
+from localrag.utils.hasher import (
+    compute_content_sha256,
+    compute_file_sha256,
+    generate_chunk_id,
+)
 from localrag.utils.ignore import IgnoreFilter
 
 

@@ -1,7 +1,9 @@
 """Parser for PDF documents extracting textual content with page tracking."""
 
 from pathlib import Path
+
 from pypdf import PdfReader
+
 from localrag.core.models import Document, FileMetadata, FileType
 from localrag.core.parsers.base import BaseParser
 

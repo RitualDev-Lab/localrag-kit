@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.models import Chunk, ChunkMetadata, FileMetadata, FileType
 from localrag.storage.sqlite_store import SQLiteStore
 from localrag.storage.vector_ops import (

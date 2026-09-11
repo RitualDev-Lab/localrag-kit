@@ -1,12 +1,11 @@
 """Structure-aware source code chunker preserving function and class boundaries."""
 
 import re
-from typing import List, Optional, Tuple
+
 from localrag.core.chunkers.base import BaseChunker
 from localrag.core.chunkers.sliding_window import SlidingWindowChunker
 from localrag.core.models import Chunk, ChunkMetadata, Document
 from localrag.utils.hasher import generate_chunk_id
-
 
 # Regex patterns matching declaration headers across popular languages
 CODE_BOUNDARY_PATTERNS = [
@@ -45,7 +44,7 @@ class CodeChunker(BaseChunker):
             min_chunk_size=min_chunk_tokens,
         )
 
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         content = document.content
         if not content or not content.strip():
             return []
@@ -54,7 +53,7 @@ class CodeChunker(BaseChunker):
         total_lines = len(lines)
 
         # First pass: find boundary split lines
-        boundaries: List[Tuple[int, str]] = []  # [(line_idx, symbol_name)]
+        boundaries: list[tuple[int, str]] = []  # [(line_idx, symbol_name)]
 
         for idx, line in enumerate(lines, start=1):
             stripped = line.strip()
@@ -73,12 +72,12 @@ class CodeChunker(BaseChunker):
             return self.fallback_chunker.chunk(document)
 
         # Slice code between consecutive boundaries
-        chunks: List[Chunk] = []
-        
+        chunks: list[Chunk] = []
+
         # Include preamble (imports, package declaration, top comments)
         first_bound_line = boundaries[0][0]
         if first_bound_line > 1:
-            preamble_lines = lines[:first_bound_line - 1]
+            preamble_lines = lines[: first_bound_line - 1]
             preamble_text = "\n".join(preamble_lines).strip()
             if preamble_text and self.estimate_tokens(preamble_text) >= self.min_chunk_tokens:
                 chunk_id = generate_chunk_id(
@@ -103,7 +102,7 @@ class CodeChunker(BaseChunker):
         # Process each bounded block
         for i, (start_line, symbol) in enumerate(boundaries):
             end_line = (boundaries[i + 1][0] - 1) if (i + 1 < len(boundaries)) else total_lines
-            block_lines = lines[start_line - 1:end_line]
+            block_lines = lines[start_line - 1 : end_line]
             block_text = "\n".join(block_lines).strip()
 
             if not block_text:
@@ -138,8 +137,8 @@ class CodeChunker(BaseChunker):
                 )
                 sub_chunks = self.fallback_chunker.chunk(sub_doc)
                 for sc in sub_chunks:
-                    sc.metadata.start_line += (start_line - 1)
-                    sc.metadata.end_line += (start_line - 1)
+                    sc.metadata.start_line += start_line - 1
+                    sc.metadata.end_line += start_line - 1
                     sc.metadata.section_title = symbol
                     sc.metadata.chunk_id = generate_chunk_id(
                         document.metadata.relative_path,

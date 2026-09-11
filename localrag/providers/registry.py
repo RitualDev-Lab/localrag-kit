@@ -1,6 +1,5 @@
 """Factory and provider registry for Embedding and LLM backends."""
 
-from typing import Optional
 from localrag.providers.base import BaseEmbeddingProvider, BaseLLMProvider
 from localrag.providers.embeddings.local_hasher import FastFeatureEmbeddingProvider
 from localrag.providers.embeddings.ollama_embedding import OllamaEmbeddingProvider
@@ -12,7 +11,7 @@ from localrag.providers.llm.openai_llm import OpenAILLMProvider
 
 def get_embedding_provider(
     provider_type: str = "auto",
-    model: Optional[str] = None,
+    model: str | None = None,
     **kwargs,
 ) -> BaseEmbeddingProvider:
     """
@@ -47,7 +46,7 @@ def get_embedding_provider(
 
 def get_llm_provider(
     provider_type: str = "auto",
-    model: Optional[str] = None,
+    model: str | None = None,
     **kwargs,
 ) -> BaseLLMProvider:
     """

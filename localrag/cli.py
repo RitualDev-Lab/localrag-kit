@@ -1,7 +1,7 @@
 """Command-line interface for LocalRAG-Kit."""
 
-import sys
 import argparse
+import sys
 from pathlib import Path
 
 # Ensure UTF-8 output on Windows consoles
@@ -13,13 +13,19 @@ if sys.platform == "win32":
         pass
 
 from rich.console import Console
-from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+)
+from rich.table import Table
+
 from localrag import __version__
 from localrag.core.ingestion import IngestionPipeline
 from localrag.storage.sqlite_store import SQLiteStore
-
 
 console = Console()
 
@@ -47,24 +53,37 @@ def main():
     index_parser = subparsers.add_parser("index", help="Index or incrementally update database for a directory")
     index_parser.add_argument("path", nargs="?", default=".", help="Target folder path (default: current directory)")
     index_parser.add_argument("--full", action="store_true", help="Force full re-index instead of incremental")
-    index_parser.add_argument("--embed", action="store_true", help="Generate dense vector embeddings for semantic search")
-    index_parser.add_argument("--embed-provider", default="auto", choices=["auto", "fast", "ollama", "openai"], help="Embedding backend (default: auto)")
+    index_parser.add_argument(
+        "--embed", action="store_true", help="Generate dense vector embeddings for semantic search"
+    )
+    index_parser.add_argument(
+        "--embed-provider",
+        default="auto",
+        choices=["auto", "fast", "ollama", "openai"],
+        help="Embedding backend (default: auto)",
+    )
     index_parser.add_argument("--embed-model", help="Embedding model name (e.g. nomic-embed-text, bge-m3)")
 
     # Command: search (keyword BM25 or Vector)
     search_parser = subparsers.add_parser("search", help="Search indexed database (BM25 keyword or vector semantic)")
     search_parser.add_argument("query", help="Search query string")
     search_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
-    search_parser.add_argument("--mode", choices=["bm25", "vector"], default="bm25", help="Search algorithm (default: bm25)")
+    search_parser.add_argument(
+        "--mode", choices=["bm25", "vector"], default="bm25", help="Search algorithm (default: bm25)"
+    )
     search_parser.add_argument("--limit", type=int, default=5, help="Number of results (default: 5)")
 
     # Command: ask (Grounded Hybrid RAG)
     ask_parser = subparsers.add_parser("ask", help="Ask a question grounded in local files with cited sources")
     ask_parser.add_argument("query", help="Question to ask")
     ask_parser.add_argument("--path", default=".", help="Workspace path containing .localrag/index.db")
-    ask_parser.add_argument("--mode", choices=["hybrid", "bm25", "vector"], default="hybrid", help="Retrieval algorithm (default: hybrid)")
+    ask_parser.add_argument(
+        "--mode", choices=["hybrid", "bm25", "vector"], default="hybrid", help="Retrieval algorithm (default: hybrid)"
+    )
     ask_parser.add_argument("--top-k", type=int, default=5, help="Number of chunks to synthesize (default: 5)")
-    ask_parser.add_argument("--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)")
+    ask_parser.add_argument(
+        "--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)"
+    )
     ask_parser.add_argument("--model", help="LLM model name (e.g. qwen3.5:4b, llama3.2)")
 
     # Command: stats
@@ -73,12 +92,21 @@ def main():
 
     # Command: serve (FastAPI Web Server)
     serve_parser = subparsers.add_parser("serve", help="Start the local FastAPI REST & Web interface server")
-    serve_parser.add_argument("path", nargs="?", default=".", help="Workspace path to serve (default: current directory)")
+    serve_parser.add_argument(
+        "path", nargs="?", default=".", help="Workspace path to serve (default: current directory)"
+    )
     serve_parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
     serve_parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
-    serve_parser.add_argument("--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)")
+    serve_parser.add_argument(
+        "--llm", default="auto", choices=["auto", "ollama", "mock", "openai"], help="LLM backend (default: auto)"
+    )
     serve_parser.add_argument("--model", help="LLM model name")
-    serve_parser.add_argument("--embed", default="fast", choices=["auto", "fast", "ollama", "openai"], help="Embedding backend (default: fast)")
+    serve_parser.add_argument(
+        "--embed",
+        default="fast",
+        choices=["auto", "fast", "ollama", "openai"],
+        help="Embedding backend (default: fast)",
+    )
     serve_parser.add_argument("--open", action="store_true", help="Automatically open browser")
 
     args = parser.parse_args()
@@ -93,11 +121,13 @@ def main():
             console.print(f"[bold red]Error:[/bold red] Target path does not exist: {target_path}")
             sys.exit(1)
 
-        console.print(Panel(
-            f"[bold cyan]LocalRAG-Kit File Harvester & Smart Chunker[/bold cyan]\n"
-            f"[dim]Analyzing target folder:[/dim] [yellow]{target_path}[/yellow]",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel(
+                f"[bold cyan]LocalRAG-Kit File Harvester & Smart Chunker[/bold cyan]\n"
+                f"[dim]Analyzing target folder:[/dim] [yellow]{target_path}[/yellow]",
+                border_style="cyan",
+            )
+        )
 
         pipeline = IngestionPipeline(target_path)
 
@@ -109,9 +139,11 @@ def main():
             console=console,
         ) as progress:
             task = progress.add_task("[green]Scanning & parsing files...", total=None)
-            
+
             def on_progress(meta, current, total):
-                progress.update(task, total=total, completed=current, description=f"[green]Processing {meta.relative_path}...")
+                progress.update(
+                    task, total=total, completed=current, description=f"[green]Processing {meta.relative_path}..."
+                )
 
             documents, stats = pipeline.process_directory(progress_callback=on_progress)
 
@@ -134,14 +166,16 @@ def main():
             for doc in documents:
                 for chunk in doc.chunks:
                     sample_count += 1
-                    console.print(Panel(
-                        f"[bold yellow]{chunk.metadata.relative_path}[/bold yellow] "
-                        f"[dim](Lines {chunk.metadata.start_line}-{chunk.metadata.end_line}, ~{chunk.metadata.estimated_tokens} tokens)[/dim]\n"
-                        f"[italic cyan]Section: {chunk.metadata.section_title or 'N/A'}[/italic cyan]\n\n"
-                        f"{chunk.text[:300]}...",
-                        title=f"Chunk #{sample_count} [{chunk.metadata.chunk_id}]",
-                        border_style="dim"
-                    ))
+                    console.print(
+                        Panel(
+                            f"[bold yellow]{chunk.metadata.relative_path}[/bold yellow] "
+                            f"[dim](Lines {chunk.metadata.start_line}-{chunk.metadata.end_line}, ~{chunk.metadata.estimated_tokens} tokens)[/dim]\n"
+                            f"[italic cyan]Section: {chunk.metadata.section_title or 'N/A'}[/italic cyan]\n\n"
+                            f"{chunk.text[:300]}...",
+                            title=f"Chunk #{sample_count} [{chunk.metadata.chunk_id}]",
+                            border_style="dim",
+                        )
+                    )
                     if sample_count >= 3:
                         break
                 if sample_count >= 3:
@@ -154,23 +188,28 @@ def main():
             sys.exit(1)
 
         db_path = get_default_db_path(target_path)
-        console.print(Panel(
-            f"[bold cyan]LocalRAG-Kit Hybrid Indexer[/bold cyan]\n"
-            f"[dim]Target workspace:[/dim] [yellow]{target_path}[/yellow]\n"
-            f"[dim]Database path:[/dim] [green]{db_path}[/green]\n"
-            f"[dim]Mode:[/dim] [{'magenta' if args.full else 'cyan'}]{'Full Rebuild' if args.full else 'Incremental Update'}[/]",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel(
+                f"[bold cyan]LocalRAG-Kit Hybrid Indexer[/bold cyan]\n"
+                f"[dim]Target workspace:[/dim] [yellow]{target_path}[/yellow]\n"
+                f"[dim]Database path:[/dim] [green]{db_path}[/green]\n"
+                f"[dim]Mode:[/dim] [{'magenta' if args.full else 'cyan'}]{'Full Rebuild' if args.full else 'Incremental Update'}[/]",
+                border_style="cyan",
+            )
+        )
 
         pipeline = IngestionPipeline(target_path)
         embed_provider = None
         if args.embed:
             from localrag.providers import get_embedding_provider
+
             embed_provider = get_embedding_provider(
                 provider_type=args.embed_provider,
                 model=args.embed_model,
             )
-            console.print(f"[dim]Embeddings enabled:[/dim] [cyan]{embed_provider.name}[/cyan] ({embed_provider.dimension} dims)")
+            console.print(
+                f"[dim]Embeddings enabled:[/dim] [cyan]{embed_provider.name}[/cyan] ({embed_provider.dimension} dims)"
+            )
 
         with SQLiteStore(db_path) as store:
             with Progress(
@@ -183,7 +222,9 @@ def main():
                 task = progress.add_task("[green]Indexing files...", total=None)
 
                 def on_progress(meta, current, total):
-                    progress.update(task, total=total, completed=current, description=f"[green]Indexing {meta.relative_path}...")
+                    progress.update(
+                        task, total=total, completed=current, description=f"[green]Indexing {meta.relative_path}..."
+                    )
 
                 stats = pipeline.index_to_store(
                     store,
@@ -216,6 +257,7 @@ def main():
         with SQLiteStore(db_path) as store:
             if args.mode == "vector":
                 from localrag.providers import get_embedding_provider
+
                 embed_provider = get_embedding_provider("fast")
                 query_vec = embed_provider.embed_text(args.query)
                 results = store.search_vector(query_vec, limit=args.limit)
@@ -226,18 +268,22 @@ def main():
                 console.print(f"[yellow]No matching chunks found for query:[/yellow] '{args.query}'")
                 return
 
-            console.print(f"\n[bold green]Found {len(results)} matching chunks for:[/bold green] [italic cyan]'{args.query}'[/italic cyan] [dim](Mode: {args.mode})[/dim]\n")
+            console.print(
+                f"\n[bold green]Found {len(results)} matching chunks for:[/bold green] [italic cyan]'{args.query}'[/italic cyan] [dim](Mode: {args.mode})[/dim]\n"
+            )
             for i, r in enumerate(results, start=1):
                 chunk = r.chunk
-                console.print(Panel(
-                    f"[bold yellow]{chunk.metadata.relative_path}[/bold yellow] "
-                    f"[dim](Lines {chunk.metadata.start_line}-{chunk.metadata.end_line})[/dim] "
-                    f"[green]Score: {r.score:.4f}[/green] [dim]({r.match_type})[/dim]\n"
-                    f"[italic cyan]Section: {chunk.metadata.section_title or 'N/A'}[/italic cyan]\n\n"
-                    f"{chunk.text}",
-                    title=f"Result #{i} [{chunk.id}]",
-                    border_style="cyan"
-                ))
+                console.print(
+                    Panel(
+                        f"[bold yellow]{chunk.metadata.relative_path}[/bold yellow] "
+                        f"[dim](Lines {chunk.metadata.start_line}-{chunk.metadata.end_line})[/dim] "
+                        f"[green]Score: {r.score:.4f}[/green] [dim]({r.match_type})[/dim]\n"
+                        f"[italic cyan]Section: {chunk.metadata.section_title or 'N/A'}[/italic cyan]\n\n"
+                        f"{chunk.text}",
+                        title=f"Result #{i} [{chunk.id}]",
+                        border_style="cyan",
+                    )
+                )
 
     elif args.command == "ask":
         target_path = Path(args.path).resolve()
@@ -260,12 +306,14 @@ def main():
                 llm_provider=llm_provider,
             )
 
-            console.print(Panel(
-                f"[bold cyan]LocalRAG Question Answerer[/bold cyan]\n"
-                f"[dim]Query:[/dim] [yellow]{args.query}[/yellow]\n"
-                f"[dim]Retrieval Mode:[/dim] [green]{args.mode}[/green] | [dim]LLM:[/dim] [cyan]{llm_provider.model_name}[/cyan]",
-                border_style="cyan"
-            ))
+            console.print(
+                Panel(
+                    f"[bold cyan]LocalRAG Question Answerer[/bold cyan]\n"
+                    f"[dim]Query:[/dim] [yellow]{args.query}[/yellow]\n"
+                    f"[dim]Retrieval Mode:[/dim] [green]{args.mode}[/green] | [dim]LLM:[/dim] [cyan]{llm_provider.model_name}[/cyan]",
+                    border_style="cyan",
+                )
+            )
 
             citations_list = []
 
@@ -288,7 +336,9 @@ def main():
                 console.print("[bold cyan]Cited Local Sources:[/bold cyan]")
                 for c in citations_list:
                     sec = f" ({c.section_title})" if c.section_title else ""
-                    console.print(f"  [green]•[/green] [bold yellow][Source #{c.source_index}][/bold yellow] [white]{c.relative_path}:{c.start_line}-{c.end_line}[/white]{sec} [dim](score: {c.score:.4f})[/dim]")
+                    console.print(
+                        f"  [green]•[/green] [bold yellow][Source #{c.source_index}][/bold yellow] [white]{c.relative_path}:{c.start_line}-{c.end_line}[/white]{sec} [dim](score: {c.score:.4f})[/dim]"
+                    )
 
     elif args.command == "stats":
         target_path = Path(args.path).resolve()
@@ -317,15 +367,18 @@ def main():
         target_path = Path(args.path).resolve()
         db_path = get_default_db_path(target_path)
 
-        console.print(Panel(
-            f"[bold cyan]LocalRAG-Kit FastAPI Server[/bold cyan]\n"
-            f"[dim]Workspace:[/dim] [yellow]{target_path}[/yellow]\n"
-            f"[dim]API URL:[/dim] [bold green]http://{args.host}:{args.port}/api[/bold green]\n"
-            f"[dim]Interactive Docs:[/dim] [cyan]http://{args.host}:{args.port}/docs[/cyan]",
-            border_style="cyan"
-        ))
+        console.print(
+            Panel(
+                f"[bold cyan]LocalRAG-Kit FastAPI Server[/bold cyan]\n"
+                f"[dim]Workspace:[/dim] [yellow]{target_path}[/yellow]\n"
+                f"[dim]API URL:[/dim] [bold green]http://{args.host}:{args.port}/api[/bold green]\n"
+                f"[dim]Interactive Docs:[/dim] [cyan]http://{args.host}:{args.port}/docs[/cyan]",
+                border_style="cyan",
+            )
+        )
 
         import uvicorn
+
         from localrag.server.app import create_app
 
         app = create_app(
@@ -337,6 +390,7 @@ def main():
 
         if args.open:
             import webbrowser
+
             webbrowser.open(f"http://{args.host}:{args.port}")
 
         uvicorn.run(app, host=args.host, port=args.port, log_level="info")

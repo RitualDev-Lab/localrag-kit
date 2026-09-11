@@ -1,18 +1,19 @@
 """Context packing, source attribution, and token budget management for RAG prompts."""
 
-from typing import List, Optional, Set, Tuple
 from pydantic import BaseModel, Field
+
 from localrag.core.chunkers.base import BaseChunker
 from localrag.storage.sqlite_store import SearchResult
 
 
 class SourceCitation(BaseModel):
     """Citation provenance for a retrieved chunk."""
+
     source_index: int = Field(description="1-based citation index (e.g. 1 for [Source #1])")
     relative_path: str = Field(description="Relative path of file")
     start_line: int = Field(description="Starting line in source file")
     end_line: int = Field(description="Ending line in source file")
-    section_title: Optional[str] = Field(default=None, description="Section or symbol name")
+    section_title: str | None = Field(default=None, description="Section or symbol name")
     score: float = Field(description="Relevance or RRF fusion score")
     text_snippet: str = Field(description="Quoted text content")
 
@@ -24,8 +25,9 @@ class SourceCitation(BaseModel):
 
 class SynthesizedContext(BaseModel):
     """Packed context ready for LLM prompt injection."""
+
     formatted_context: str
-    citations: List[SourceCitation]
+    citations: list[SourceCitation]
     total_tokens: int
 
 
@@ -35,14 +37,14 @@ class ContextSynthesizer:
     def __init__(self, max_token_budget: int = 3500):
         self.max_token_budget = max_token_budget
 
-    def synthesize(self, results: List[SearchResult]) -> SynthesizedContext:
+    def synthesize(self, results: list[SearchResult]) -> SynthesizedContext:
         """Filter, deduplicate, and assemble top results into numbered context blocks."""
         if not results:
             return SynthesizedContext(formatted_context="", citations=[], total_tokens=0)
 
-        citations: List[SourceCitation] = []
-        blocks: List[str] = []
-        seen_line_ranges: Set[Tuple[str, int, int]] = set()
+        citations: list[SourceCitation] = []
+        blocks: list[str] = []
+        seen_line_ranges: set[tuple[str, int, int]] = set()
         accumulated_tokens = 0
 
         source_idx = 1

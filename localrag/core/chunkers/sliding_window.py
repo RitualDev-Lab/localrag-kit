@@ -1,7 +1,7 @@
 """Token-aware sliding window chunker with exact line number preservation."""
 
 import re
-from typing import List, Optional
+
 from localrag.core.chunkers.base import BaseChunker
 from localrag.core.models import Chunk, ChunkMetadata, Document
 from localrag.utils.hasher import generate_chunk_id
@@ -12,15 +12,15 @@ class SlidingWindowChunker(BaseChunker):
 
     def __init__(
         self,
-        chunk_size: int = 400,       # Approximate target tokens per chunk
-        chunk_overlap: int = 60,     # Overlap tokens between consecutive chunks
-        min_chunk_size: int = 40,    # Ignore smaller residual chunks
+        chunk_size: int = 400,  # Approximate target tokens per chunk
+        chunk_overlap: int = 60,  # Overlap tokens between consecutive chunks
+        min_chunk_size: int = 40,  # Ignore smaller residual chunks
     ):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.min_chunk_size = min_chunk_size
 
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         content = document.content
         if not content or not content.strip():
             return []
@@ -39,6 +39,7 @@ class SlidingWindowChunker(BaseChunker):
         def offset_to_line(char_pos: int) -> int:
             """Binary search line number for character offset."""
             import bisect
+
             idx = bisect.bisect_right(line_start_offsets, char_pos)
             return max(1, idx)
 
@@ -69,7 +70,7 @@ class SlidingWindowChunker(BaseChunker):
                 units.append((p_text, p_start, p_end))
 
         # Build overlapping chunks from units
-        chunks: List[Chunk] = []
+        chunks: list[Chunk] = []
         curr_units = []
         curr_tokens = 0
         i = 0

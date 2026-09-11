@@ -3,8 +3,8 @@
 import json
 import time
 from pathlib import Path
-from typing import AsyncIterator, List, Optional
-from fastapi import APIRouter, HTTPException, Query, Request
+
+from fastapi import APIRouter, HTTPException, Query
 from starlette.responses import StreamingResponse
 
 from localrag.core.ingestion import IngestionPipeline
@@ -100,6 +100,7 @@ def create_router(
           data: {"type": "token", "token": "..."}
           data: {"type": "done"}
         """
+
         def event_generator():
             try:
                 # 1. First retrieve & send citations
@@ -117,9 +118,9 @@ def create_router(
 
                 # 2. Stream LLM tokens
                 from localrag.retrieval.orchestrator import SYSTEM_PROMPT
+
                 prompt = (
-                    f"Context from local files:\n\n{ctx.formatted_context}\n\n"
-                    f"User Question:\n{req.query}\n\nAnswer:"
+                    f"Context from local files:\n\n{ctx.formatted_context}\n\nUser Question:\n{req.query}\n\nAnswer:"
                 )
 
                 for token in llm_provider.stream_generate(

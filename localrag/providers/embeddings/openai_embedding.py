@@ -1,8 +1,9 @@
 """OpenAI-compatible cloud embedding provider (OpenAI, Gemini, Together, Groq)."""
 
 import os
-from typing import List, Optional
+
 import httpx
+
 from localrag.providers.base import BaseEmbeddingProvider
 from localrag.storage.vector_ops import normalize_vector
 
@@ -13,7 +14,7 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
     def __init__(
         self,
         model: str = "text-embedding-3-small",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         base_url: str = "https://api.openai.com/v1",
         timeout: float = 30.0,
     ):
@@ -34,11 +35,11 @@ class OpenAIEmbeddingProvider(BaseEmbeddingProvider):
     def is_available(self) -> bool:
         return bool(self.api_key)
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         batch = self.embed_batch([text])
         return batch[0] if batch else [0.0] * self._dim
 
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         if not texts or not self.api_key:
             return [[0.0] * self._dim for _ in texts]
 

@@ -1,6 +1,7 @@
 """Mock LLM provider for unit testing, offline development, and deterministic synthesis."""
 
-from typing import Iterator, Optional
+from collections.abc import Iterator
+
 from localrag.providers.base import BaseLLMProvider
 
 
@@ -17,7 +18,7 @@ class MockLLMProvider(BaseLLMProvider):
     def generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> str:
@@ -26,14 +27,14 @@ class MockLLMProvider(BaseLLMProvider):
     def stream_generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> Iterator[str]:
         response = (
-            f"Based on the provided context, here is the answer:\n\n"
-            f"Summary: Verified and processed request.\n"
-            f"Target Details: Extracted from local index chunks."
+            "Based on the provided context, here is the answer:\n\n"
+            "Summary: Verified and processed request.\n"
+            "Target Details: Extracted from local index chunks."
         )
         # Yield token by token for streaming simulation
         words = response.split(" ")

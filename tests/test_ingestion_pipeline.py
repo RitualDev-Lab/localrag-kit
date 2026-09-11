@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.ingestion import IngestionPipeline
 from localrag.storage.sqlite_store import SQLiteStore
 
@@ -11,7 +12,9 @@ def test_ingestion_pipeline_end_to_end():
         root = Path(tmpdir)
 
         # Populate temporary project tree
-        (root / "README.md").write_text("# Welcome to LocalRAG\nFull local offline RAG.\n\n## Quickstart\nRun localrag index.")
+        (root / "README.md").write_text(
+            "# Welcome to LocalRAG\nFull local offline RAG.\n\n## Quickstart\nRun localrag index."
+        )
         (root / "src").mkdir()
         (root / "src" / "main.py").write_text("""def start_server():
     print('Server listening')
@@ -24,6 +27,7 @@ def stop_server():
         pipeline = IngestionPipeline(root)
 
         events = []
+
         def on_progress(meta, current, total):
             events.append((meta.relative_path, current, total))
 

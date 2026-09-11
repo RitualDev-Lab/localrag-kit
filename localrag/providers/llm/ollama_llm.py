@@ -1,10 +1,11 @@
 """Ollama local LLM provider supporting streaming and synchronous inference."""
 
 import json
-from typing import Iterator, Optional
-import httpx
-from localrag.providers.base import BaseLLMProvider
+from collections.abc import Iterator
 
+import httpx
+
+from localrag.providers.base import BaseLLMProvider
 
 DEFAULT_OLLAMA_LLM_MODEL = "llama3.2"
 
@@ -35,8 +36,7 @@ class OllamaLLMProvider(BaseLLMProvider):
                     models = res.json().get("models", [])
                     target = self.model.lower()
                     return any(
-                        target in m.get("name", "").lower() or target in m.get("model", "").lower()
-                        for m in models
+                        target in m.get("name", "").lower() or target in m.get("model", "").lower() for m in models
                     )
                 return False
         except Exception:
@@ -45,7 +45,7 @@ class OllamaLLMProvider(BaseLLMProvider):
     def generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> str:
@@ -56,7 +56,7 @@ class OllamaLLMProvider(BaseLLMProvider):
     def stream_generate(
         self,
         prompt: str,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
     ) -> Iterator[str]:

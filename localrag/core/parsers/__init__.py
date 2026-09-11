@@ -1,6 +1,7 @@
 """Parser registry and dispatcher."""
 
 from typing import Dict, List, Optional
+
 from localrag.core.models import Document, FileMetadata, FileType
 from localrag.core.parsers.base import BaseParser
 from localrag.core.parsers.code_parser import CodeParser
@@ -11,14 +12,14 @@ from localrag.core.parsers.text_parser import TextParser
 class ParserRegistry:
     """Dispatches files to their registered specialized parser."""
 
-    def __init__(self, parsers: Optional[List[BaseParser]] = None):
-        self.parsers: List[BaseParser] = parsers or [
+    def __init__(self, parsers: list[BaseParser] | None = None):
+        self.parsers: list[BaseParser] = parsers or [
             TextParser(),
             CodeParser(),
             PDFParser(),
         ]
 
-    def get_parser(self, file_type: FileType) -> Optional[BaseParser]:
+    def get_parser(self, file_type: FileType) -> BaseParser | None:
         """Find the first matching parser for a FileType."""
         for parser in self.parsers:
             if parser.can_handle(file_type):
@@ -33,4 +34,4 @@ class ParserRegistry:
         return parser.parse(metadata)
 
 
-__all__ = ["BaseParser", "TextParser", "CodeParser", "PDFParser", "ParserRegistry"]
+__all__ = ["BaseParser", "CodeParser", "PDFParser", "ParserRegistry", "TextParser"]

@@ -1,9 +1,8 @@
 """Pydantic request and response schemas for LocalRAG-Kit REST & SSE API."""
 
-from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
+
 from localrag.core.models import Chunk, FileMetadata
-from localrag.retrieval.synthesizer import SourceCitation
 from localrag.storage.sqlite_store import SearchResult, StoreStats
 
 
@@ -25,7 +24,7 @@ class SearchResponse(BaseModel):
     query: str
     mode: str
     count: int
-    results: List[SearchResult]
+    results: list[SearchResult]
 
 
 class ChatRequest(BaseModel):
@@ -51,5 +50,5 @@ class ReindexResponse(BaseModel):
 
 class ChunkDetailResponse(BaseModel):
     chunk: Chunk
-    parent_file: Optional[FileMetadata] = None
-    file_content_snippet: Optional[str] = None
+    parent_file: FileMetadata | None = None
+    file_content_snippet: str | None = None

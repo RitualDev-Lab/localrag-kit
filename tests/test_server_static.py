@@ -1,7 +1,8 @@
-﻿"""Tests for web UI static assets serving and integration."""
+"""Tests for web UI static assets serving and integration."""
 
 import tempfile
 from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from localrag.providers import FastFeatureEmbeddingProvider, MockLLMProvider

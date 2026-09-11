@@ -2,9 +2,11 @@
 
 import array
 import math
-from typing import List, Optional, Sequence, Tuple
+from collections.abc import Sequence
+
 try:
     import numpy as np
+
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False
@@ -20,7 +22,7 @@ def serialize_vector(vector: Sequence[float]) -> bytes:
     return arr.tobytes()
 
 
-def deserialize_vector(blob: bytes) -> List[float]:
+def deserialize_vector(blob: bytes) -> list[float]:
     """Convert a 32-bit float byte string back into a Python list of floats."""
     if not blob:
         return []
@@ -31,7 +33,7 @@ def deserialize_vector(blob: bytes) -> List[float]:
     return arr.tolist()
 
 
-def normalize_vector(vector: Sequence[float]) -> List[float]:
+def normalize_vector(vector: Sequence[float]) -> list[float]:
     """Normalize a vector to unit length (L2 norm = 1.0)."""
     if not vector:
         return []
@@ -74,7 +76,7 @@ def cosine_similarity(v1: Sequence[float], v2: Sequence[float]) -> float:
 def batch_cosine_similarities(
     query_vector: Sequence[float],
     candidate_vectors: Sequence[Sequence[float]],
-) -> List[float]:
+) -> list[float]:
     """Calculate cosine similarity against a batch of candidate vectors efficiently."""
     if not candidate_vectors:
         return []

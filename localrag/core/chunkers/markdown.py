@@ -1,7 +1,7 @@
 """Structure-aware Markdown chunker respecting heading hierarchies and code fences."""
 
 import re
-from typing import List, Tuple
+
 from localrag.core.chunkers.base import BaseChunker
 from localrag.core.chunkers.sliding_window import SlidingWindowChunker
 from localrag.core.models import Chunk, ChunkMetadata, Document
@@ -24,7 +24,7 @@ class MarkdownChunker(BaseChunker):
             min_chunk_size=min_chunk_tokens,
         )
 
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         content = document.content
         if not content or not content.strip():
             return []
@@ -33,9 +33,9 @@ class MarkdownChunker(BaseChunker):
         total_lines = len(lines)
 
         # Track heading hierarchy and code block fences
-        sections: List[Tuple[str, int, int, str]] = []  # (heading_path, start_line, end_line, text)
-        current_heading_stack: List[Tuple[int, str]] = []  # [(level, title)]
-        current_lines: List[str] = []
+        sections: list[tuple[str, int, int, str]] = []  # (heading_path, start_line, end_line, text)
+        current_heading_stack: list[tuple[int, str]] = []  # [(level, title)]
+        current_lines: list[str] = []
         current_start_line = 1
         in_code_fence = False
 
@@ -80,7 +80,7 @@ class MarkdownChunker(BaseChunker):
                 sections.append((heading_path, current_start_line, total_lines, sec_text))
 
         # Convert sections into Chunks (sub-chunking if any section exceeds max tokens)
-        chunks: List[Chunk] = []
+        chunks: list[Chunk] = []
 
         for heading_path, start_line, end_line, sec_text in sections:
             tokens = self.estimate_tokens(sec_text)
@@ -112,8 +112,8 @@ class MarkdownChunker(BaseChunker):
                 sub_chunks = self.fallback_chunker.chunk(sub_doc)
                 for sc in sub_chunks:
                     # Offset line numbers relative to parent section
-                    sc.metadata.start_line += (start_line - 1)
-                    sc.metadata.end_line += (start_line - 1)
+                    sc.metadata.start_line += start_line - 1
+                    sc.metadata.end_line += start_line - 1
                     sc.metadata.section_title = heading_path or None
                     sc.metadata.chunk_id = generate_chunk_id(
                         document.metadata.relative_path,

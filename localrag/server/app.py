@@ -1,22 +1,27 @@
 """FastAPI application factory for LocalRAG-Kit."""
 
 from pathlib import Path
-from typing import Optional
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from localrag import __version__
-from localrag.providers import BaseEmbeddingProvider, BaseLLMProvider, get_embedding_provider, get_llm_provider
+from localrag.providers import (
+    BaseEmbeddingProvider,
+    BaseLLMProvider,
+    get_embedding_provider,
+    get_llm_provider,
+)
 from localrag.server.routes import create_router
 from localrag.storage.sqlite_store import SQLiteStore
 
 
 def create_app(
     workspace_path: str | Path,
-    db_path: Optional[str | Path] = None,
-    embedding_provider: Optional[BaseEmbeddingProvider] = None,
-    llm_provider: Optional[BaseLLMProvider] = None,
+    db_path: str | Path | None = None,
+    embedding_provider: BaseEmbeddingProvider | None = None,
+    llm_provider: BaseLLMProvider | None = None,
     embed_provider_name: str = "fast",
     llm_provider_name: str = "auto",
 ) -> FastAPI:

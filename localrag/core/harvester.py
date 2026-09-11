@@ -1,15 +1,15 @@
 """Directory crawler and file harvester with format classification."""
 
 import os
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Set
+
 from localrag.core.models import FileMetadata, FileType
 from localrag.utils.hasher import compute_file_sha256
 from localrag.utils.ignore import IgnoreFilter
 
-
 # Mapping of file extensions to FileType categories
-EXTENSION_MAP: Dict[str, FileType] = {
+EXTENSION_MAP: dict[str, FileType] = {
     # Markdown
     ".md": FileType.MARKDOWN,
     ".markdown": FileType.MARKDOWN,
@@ -71,7 +71,7 @@ EXTENSION_MAP: Dict[str, FileType] = {
     ".dockerfile": FileType.CODE,
 }
 
-LANGUAGE_BY_EXT: Dict[str, str] = {
+LANGUAGE_BY_EXT: dict[str, str] = {
     ".py": "python",
     ".pyi": "python",
     ".js": "javascript",
@@ -109,18 +109,18 @@ class FileHarvester:
     def __init__(
         self,
         root_dir: str | Path,
-        ignore_filter: Optional[IgnoreFilter] = None,
+        ignore_filter: IgnoreFilter | None = None,
         max_file_size_bytes: int = 5 * 1024 * 1024,  # 5MB per file limit
-        allowed_types: Optional[Set[FileType]] = None,
+        allowed_types: set[FileType] | None = None,
     ):
         self.root_dir = Path(root_dir).resolve()
         self.ignore_filter = ignore_filter or IgnoreFilter(self.root_dir)
         self.max_file_size_bytes = max_file_size_bytes
         self.allowed_types = allowed_types
 
-    def harvest(self) -> List[FileMetadata]:
+    def harvest(self) -> list[FileMetadata]:
         """Traverse directory and return metadata for all valid indexable files."""
-        collected: List[FileMetadata] = []
+        collected: list[FileMetadata] = []
         for meta in self.iter_files():
             collected.append(meta)
         return collected
@@ -137,10 +137,7 @@ class FileHarvester:
 
             # Filter out ignored directories in-place to avoid traversing subtrees
             dirs[:] = [
-                d for d in dirs
-                if not self.ignore_filter.is_ignored(
-                    os.path.join(rel_root, d).replace("\\", "/") + "/"
-                )
+                d for d in dirs if not self.ignore_filter.is_ignored(os.path.join(rel_root, d).replace("\\", "/") + "/")
             ]
 
             for file_name in files:
@@ -153,7 +150,7 @@ class FileHarvester:
                 if file_meta:
                     yield file_meta
 
-    def _inspect_file(self, abs_path: Path, rel_path: str) -> Optional[FileMetadata]:
+    def _inspect_file(self, abs_path: Path, rel_path: str) -> FileMetadata | None:
         """Inspect and categorize a single file."""
         try:
             stat = abs_path.stat()

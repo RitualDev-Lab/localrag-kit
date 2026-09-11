@@ -1,23 +1,23 @@
 """Retrieval, ranking, and context synthesis layer for LocalRAG-Kit."""
 
+from localrag.retrieval.orchestrator import (
+    SYSTEM_PROMPT,
+    RAGOrchestrator,
+    RAGResponse,
+)
 from localrag.retrieval.rrf import reciprocal_rank_fusion
 from localrag.retrieval.synthesizer import (
     ContextSynthesizer,
     SourceCitation,
     SynthesizedContext,
 )
-from localrag.retrieval.orchestrator import (
-    RAGOrchestrator,
-    RAGResponse,
-    SYSTEM_PROMPT,
-)
 
 __all__ = [
-    "reciprocal_rank_fusion",
+    "SYSTEM_PROMPT",
     "ContextSynthesizer",
-    "SourceCitation",
-    "SynthesizedContext",
     "RAGOrchestrator",
     "RAGResponse",
-    "SYSTEM_PROMPT",
+    "SourceCitation",
+    "SynthesizedContext",
+    "reciprocal_rank_fusion",
 ]

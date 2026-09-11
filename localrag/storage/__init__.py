@@ -1,21 +1,21 @@
 """Storage layer for LocalRAG-Kit."""
 
-from localrag.storage.sqlite_store import SQLiteStore, SearchResult, StoreStats
+from localrag.storage.sqlite_store import SearchResult, SQLiteStore, StoreStats
 from localrag.storage.vector_ops import (
-    cosine_similarity,
     batch_cosine_similarities,
-    serialize_vector,
+    cosine_similarity,
     deserialize_vector,
     normalize_vector,
+    serialize_vector,
 )
 
 __all__ = [
     "SQLiteStore",
     "SearchResult",
     "StoreStats",
-    "cosine_similarity",
     "batch_cosine_similarities",
-    "serialize_vector",
+    "cosine_similarity",
     "deserialize_vector",
     "normalize_vector",
+    "serialize_vector",
 ]

@@ -1,13 +1,17 @@
 """High-level RAG orchestrator coordinating hybrid search, RRF, and LLM generation."""
 
-from typing import Callable, Iterator, List, Optional
-from pydantic import BaseModel, Field
+from collections.abc import Callable, Iterator
+
+from pydantic import BaseModel
 
 from localrag.providers.base import BaseEmbeddingProvider, BaseLLMProvider
 from localrag.retrieval.rrf import reciprocal_rank_fusion
-from localrag.retrieval.synthesizer import ContextSynthesizer, SourceCitation, SynthesizedContext
-from localrag.storage.sqlite_store import SQLiteStore, SearchResult
-
+from localrag.retrieval.synthesizer import (
+    ContextSynthesizer,
+    SourceCitation,
+    SynthesizedContext,
+)
+from localrag.storage.sqlite_store import SearchResult, SQLiteStore
 
 SYSTEM_PROMPT = """You are LocalRAG-Kit, an expert offline AI assistant for local codebases and documents.
 Answer the user's inquiry thoroughly and accurately using ONLY the provided context sources.
@@ -21,9 +25,10 @@ Guidelines:
 
 class RAGResponse(BaseModel):
     """Complete answer with provenance citations and retrieval metrics."""
+
     query: str
     answer: str
-    citations: List[SourceCitation]
+    citations: list[SourceCitation]
     retrieved_count: int
     context_tokens: int
 
@@ -34,9 +39,9 @@ class RAGOrchestrator:
     def __init__(
         self,
         store: SQLiteStore,
-        embedding_provider: Optional[BaseEmbeddingProvider] = None,
-        llm_provider: Optional[BaseLLMProvider] = None,
-        context_synthesizer: Optional[ContextSynthesizer] = None,
+        embedding_provider: BaseEmbeddingProvider | None = None,
+        llm_provider: BaseLLMProvider | None = None,
+        context_synthesizer: ContextSynthesizer | None = None,
     ):
         self.store = store
         self.embedding_provider = embedding_provider
@@ -48,7 +53,7 @@ class RAGOrchestrator:
         query: str,
         top_k: int = 8,
         mode: str = "hybrid",
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Execute search according to mode ('hybrid', 'bm25', or 'vector').
         In 'hybrid' mode, performs both searches and fuses rankings via RRF.
@@ -65,7 +70,7 @@ class RAGOrchestrator:
         # Hybrid search: fetch from both and merge with RRF
         bm25_res = self.store.search_bm25(query, limit=top_k * 2)
 
-        vector_res: List[SearchResult] = []
+        vector_res: list[SearchResult] = []
         if self.embedding_provider:
             query_vec = self.embedding_provider.embed_text(query)
             vector_res = self.store.search_vector(query_vec, limit=top_k * 2)
@@ -121,7 +126,7 @@ class RAGOrchestrator:
         top_k: int = 6,
         mode: str = "hybrid",
         temperature: float = 0.5,
-        citations_callback: Optional[Callable[[List[SourceCitation]], None]] = None,
+        citations_callback: Callable[[list[SourceCitation]], None] | None = None,
     ) -> Iterator[str]:
         """Stream generated answer tokens in real time while notifying citations callback."""
         if not self.llm_provider:

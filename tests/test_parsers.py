@@ -2,10 +2,11 @@
 
 import tempfile
 from pathlib import Path
+
 from localrag.core.models import FileMetadata, FileType
+from localrag.core.parsers import ParserRegistry
 from localrag.core.parsers.code_parser import CodeParser
 from localrag.core.parsers.text_parser import TextParser
-from localrag.core.parsers import ParserRegistry
 
 
 def test_text_parser():

@@ -1,7 +1,7 @@
 """Abstract Base Class for text and document chunkers."""
 
 from abc import ABC, abstractmethod
-from typing import List
+
 from localrag.core.models import Chunk, Document
 
 
@@ -9,9 +9,8 @@ class BaseChunker(ABC):
     """Interface for chunking an in-memory Document into discrete searchable Chunks."""
 
     @abstractmethod
-    def chunk(self, document: Document) -> List[Chunk]:
+    def chunk(self, document: Document) -> list[Chunk]:
         """Split document content into a list of Chunk objects with metadata."""
-        pass
 
     @staticmethod
     def estimate_tokens(text: str) -> int:

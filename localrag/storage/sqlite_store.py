@@ -3,8 +3,9 @@
 import json
 import sqlite3
 import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Set, Tuple
+
 from pydantic import BaseModel, Field
 
 from localrag.core.models import Chunk, ChunkMetadata, FileMetadata, FileType
@@ -12,13 +13,13 @@ from localrag.storage.schema import CREATE_TABLES_SQL, CREATE_TRIGGERS_SQL
 from localrag.storage.vector_ops import (
     batch_cosine_similarities,
     deserialize_vector,
-    normalize_vector,
     serialize_vector,
 )
 
 
 class SearchResult(BaseModel):
     """Result of a search query with score and provenance."""
+
     chunk: Chunk
     score: float = Field(description="Relevance score (higher is better)")
     match_type: str = Field(description="Search mechanism: 'bm25', 'vector', or 'hybrid'")
@@ -26,6 +27,7 @@ class SearchResult(BaseModel):
 
 class StoreStats(BaseModel):
     """Aggregate storage metrics."""
+
     total_files: int = 0
     total_chunks: int = 0
     total_vectorized_chunks: int = 0
@@ -39,7 +41,7 @@ class SQLiteStore:
     def __init__(self, db_path: str | Path):
         self.db_path = Path(db_path).resolve()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._init_connection()
 
     def _init_connection(self):
@@ -118,7 +120,7 @@ class SQLiteStore:
         with self._conn:
             self._conn.execute("DELETE FROM files WHERE relative_path = ?", (relative_path,))
 
-    def get_file(self, relative_path: str) -> Optional[FileMetadata]:
+    def get_file(self, relative_path: str) -> FileMetadata | None:
         """Fetch metadata for a stored file."""
         cur = self._conn.execute(
             "SELECT * FROM files WHERE relative_path = ?",
@@ -138,7 +140,7 @@ class SQLiteStore:
             language=row["language"],
         )
 
-    def get_all_files(self) -> List[FileMetadata]:
+    def get_all_files(self) -> list[FileMetadata]:
         """Retrieve all currently indexed physical files."""
         cur = self._conn.execute("SELECT * FROM files ORDER BY relative_path ASC")
         results = []
@@ -159,8 +161,8 @@ class SQLiteStore:
 
     def get_changed_files(
         self,
-        discovered_files: List[FileMetadata],
-    ) -> Tuple[List[FileMetadata], List[str]]:
+        discovered_files: list[FileMetadata],
+    ) -> tuple[list[FileMetadata], list[str]]:
         """
         Compare discovered filesystem files against indexed database records.
         Returns:
@@ -170,8 +172,8 @@ class SQLiteStore:
         cur = self._conn.execute("SELECT relative_path, sha256 FROM files")
         existing_map = {row["relative_path"]: row["sha256"] for row in cur.fetchall()}
 
-        modified_or_new: List[FileMetadata] = []
-        discovered_paths: Set[str] = set()
+        modified_or_new: list[FileMetadata] = []
+        discovered_paths: set[str] = set()
 
         for f in discovered_files:
             discovered_paths.add(f.relative_path)
@@ -186,7 +188,7 @@ class SQLiteStore:
     # Chunks & Dense Vector Management
     # -------------------------------------------------------------------------
 
-    def upsert_chunks(self, chunks: List[Chunk]):
+    def upsert_chunks(self, chunks: list[Chunk]):
         """Batch insert or replace chunks along with their vector embeddings."""
         if not chunks:
             return
@@ -195,20 +197,22 @@ class SQLiteStore:
         for c in chunks:
             emb_blob = serialize_vector(c.embedding) if c.embedding else None
             extra_json = json.dumps(c.metadata.extra) if c.metadata.extra else None
-            rows.append((
-                c.metadata.chunk_id,
-                c.metadata.relative_path,
-                c.metadata.file_path,
-                c.metadata.file_type.value,
-                c.metadata.start_line,
-                c.metadata.end_line,
-                c.metadata.char_count,
-                c.metadata.estimated_tokens,
-                c.metadata.section_title,
-                c.text,
-                emb_blob,
-                extra_json,
-            ))
+            rows.append(
+                (
+                    c.metadata.chunk_id,
+                    c.metadata.relative_path,
+                    c.metadata.file_path,
+                    c.metadata.file_type.value,
+                    c.metadata.start_line,
+                    c.metadata.end_line,
+                    c.metadata.char_count,
+                    c.metadata.estimated_tokens,
+                    c.metadata.section_title,
+                    c.text,
+                    emb_blob,
+                    extra_json,
+                )
+            )
 
         with self._conn:
             self._conn.executemany(
@@ -239,7 +243,7 @@ class SQLiteStore:
         with self._conn:
             self._conn.execute("DELETE FROM chunks WHERE relative_path = ?", (relative_path,))
 
-    def get_chunk(self, chunk_id: str) -> Optional[Chunk]:
+    def get_chunk(self, chunk_id: str) -> Chunk | None:
         """Fetch a single chunk by ID."""
         cur = self._conn.execute("SELECT * FROM chunks WHERE chunk_id = ?", (chunk_id,))
         row = cur.fetchone()
@@ -247,7 +251,7 @@ class SQLiteStore:
             return None
         return self._row_to_chunk(row)
 
-    def get_all_chunks(self) -> List[Chunk]:
+    def get_all_chunks(self) -> list[Chunk]:
         """Fetch all chunks stored in the database."""
         cur = self._conn.execute("SELECT * FROM chunks")
         return [self._row_to_chunk(row) for row in cur.fetchall()]
@@ -256,7 +260,7 @@ class SQLiteStore:
     # Search Engines (FTS5 BM25 + Dense Vector Cosine Similarity)
     # -------------------------------------------------------------------------
 
-    def search_bm25(self, query: str, limit: int = 20) -> List[SearchResult]:
+    def search_bm25(self, query: str, limit: int = 20) -> list[SearchResult]:
         """
         Execute BM25 keyword search using SQLite FTS5.
         Returns top matching chunks sorted by BM25 relevance.
@@ -301,7 +305,7 @@ class SQLiteStore:
         query_embedding: Sequence[float],
         limit: int = 20,
         min_similarity: float = 0.0,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Execute dense vector cosine similarity search across all stored chunk embeddings.
         Returns top matching chunks sorted by cosine similarity.
@@ -309,15 +313,13 @@ class SQLiteStore:
         if not query_embedding:
             return []
 
-        cur = self._conn.execute(
-            "SELECT * FROM chunks WHERE embedding IS NOT NULL"
-        )
+        cur = self._conn.execute("SELECT * FROM chunks WHERE embedding IS NOT NULL")
         rows = cur.fetchall()
         if not rows:
             return []
 
-        candidate_chunks: List[Chunk] = []
-        candidate_vectors: List[List[float]] = []
+        candidate_chunks: list[Chunk] = []
+        candidate_vectors: list[list[float]] = []
 
         for row in rows:
             chunk = self._row_to_chunk(row)
@@ -332,15 +334,12 @@ class SQLiteStore:
 
         # Pair chunks with scores and filter
         scored_pairs = [
-            (chunk, score)
-            for chunk, score in zip(candidate_chunks, similarities)
-            if score >= min_similarity
+            (chunk, score) for chunk, score in zip(candidate_chunks, similarities) if score >= min_similarity
         ]
         scored_pairs.sort(key=lambda p: p[1], reverse=True)
 
         results = [
-            SearchResult(chunk=chunk, score=float(score), match_type="vector")
-            for chunk, score in scored_pairs[:limit]
+            SearchResult(chunk=chunk, score=float(score), match_type="vector") for chunk, score in scored_pairs[:limit]
         ]
         return results
 
@@ -352,9 +351,7 @@ class SQLiteStore:
         """Compute database statistics."""
         file_count = self._conn.execute("SELECT count(*) FROM files").fetchone()[0]
         chunk_count = self._conn.execute("SELECT count(*) FROM chunks").fetchone()[0]
-        vec_count = self._conn.execute(
-            "SELECT count(*) FROM chunks WHERE embedding IS NOT NULL"
-        ).fetchone()[0]
+        vec_count = self._conn.execute("SELECT count(*) FROM chunks WHERE embedding IS NOT NULL").fetchone()[0]
 
         size_bytes = 0
         if self.db_path.exists():

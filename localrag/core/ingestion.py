@@ -1,8 +1,14 @@
 """Unified ingestion orchestrator coordinating file harvesting, parsing, chunking, and database indexing."""
 
+from collections.abc import Callable, Iterator
 from pathlib import Path
-from typing import Callable, Iterator, List, Optional, Tuple
-from pydantic import BaseModel, Field
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from localrag.providers.base import BaseEmbeddingProvider
+
+from pydantic import BaseModel
+
 from localrag.core.chunkers import ChunkerRegistry
 from localrag.core.harvester import FileHarvester
 from localrag.core.models import Chunk, Document, FileMetadata
@@ -13,6 +19,7 @@ from localrag.utils.ignore import IgnoreFilter
 
 class IngestionStats(BaseModel):
     """Aggregate metrics of an in-memory ingestion run."""
+
     total_files_scanned: int = 0
     total_files_parsed: int = 0
     total_chunks_produced: int = 0
@@ -24,6 +31,7 @@ class IngestionStats(BaseModel):
 
 class IndexingStats(BaseModel):
     """Aggregate metrics of a database indexing run."""
+
     total_files_scanned: int = 0
     files_added_or_modified: int = 0
     files_unchanged: int = 0
@@ -38,7 +46,7 @@ class IngestionPipeline:
     def __init__(
         self,
         root_dir: str | Path,
-        custom_ignore_patterns: Optional[List[str]] = None,
+        custom_ignore_patterns: list[str] | None = None,
         max_file_size_bytes: int = 5 * 1024 * 1024,
     ):
         self.root_dir = Path(root_dir).resolve()
@@ -53,12 +61,12 @@ class IngestionPipeline:
 
     def process_directory(
         self,
-        progress_callback: Optional[Callable[[FileMetadata, int, int], None]] = None,
-    ) -> Tuple[List[Document], IngestionStats]:
+        progress_callback: Callable[[FileMetadata, int, int], None] | None = None,
+    ) -> tuple[list[Document], IngestionStats]:
         """Harvest, parse, and chunk all indexable files in the directory in memory."""
         files = self.harvester.harvest()
         stats = IngestionStats(total_files_scanned=len(files))
-        documents: List[Document] = []
+        documents: list[Document] = []
 
         for i, meta in enumerate(files, start=1):
             if progress_callback:
@@ -83,7 +91,7 @@ class IngestionPipeline:
         store: SQLiteStore,
         incremental: bool = True,
         embedding_provider: Optional["BaseEmbeddingProvider"] = None,
-        progress_callback: Optional[Callable[[FileMetadata, int, int], None]] = None,
+        progress_callback: Callable[[FileMetadata, int, int], None] | None = None,
     ) -> IndexingStats:
         """
         Harvest files and write them to SQLiteStore with FTS5 and vector tables.

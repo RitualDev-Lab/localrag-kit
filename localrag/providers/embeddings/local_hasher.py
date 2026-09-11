@@ -1,9 +1,8 @@
 """Fast, 100% offline, standalone dense feature vector embedding provider."""
 
 import hashlib
-import math
 import re
-from typing import List, Sequence
+
 from localrag.providers.base import BaseEmbeddingProvider
 from localrag.storage.vector_ops import normalize_vector
 
@@ -25,7 +24,7 @@ class FastFeatureEmbeddingProvider(BaseEmbeddingProvider):
     def dimension(self) -> int:
         return self._dim
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         """Generate a dense, normalized vector representation of input text."""
         if not text or not text.strip():
             return [0.0] * self._dim
@@ -50,15 +49,15 @@ class FastFeatureEmbeddingProvider(BaseEmbeddingProvider):
         for token in tokens:
             if len(token) >= 4:
                 for j in range(len(token) - 2):
-                    sub = token[j:j + 3]
+                    sub = token[j : j + 3]
                     self._project_token(sub, weight=0.4, vec=vec)
 
         return normalize_vector(vec)
 
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         return [self.embed_text(t) for t in texts]
 
-    def _project_token(self, token: str, weight: float, vec: List[float]):
+    def _project_token(self, token: str, weight: float, vec: list[float]):
         """Hash token to feature index with random sign projection."""
         h = hashlib.sha256(token.encode("utf-8")).digest()
         # Derive two 32-bit integers from SHA-256
