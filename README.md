@@ -1,19 +1,42 @@
-﻿<div align="center">
+<div align="center">
 
 # ⚡ LocalRAG-Kit
 
 **100% Offline, Privacy-First Local RAG Search & Chat Engine for Codebases and Documents**
 
 [![CI](https://github.com/RitualDev-Lab/localrag-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/RitualDev-Lab/localrag-kit/actions)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
-[![Tests Passing](https://img.shields.io/badge/tests-31%20passing-brightgreen.svg)](tests/)
-[![Architecture: Pure SQLite](https://img.shields.io/badge/storage-SQLite%20+%20FTS5%20+%20Vectors-purple.svg)]()
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Storage: Pure SQLite](https://img.shields.io/badge/Storage-SQLite%20+%20FTS5%20+%20Vectors-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://github.com/RitualDev-Lab/localrag-kit)
+[![Tests Passing](https://img.shields.io/badge/Tests-31%20Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![Telemetry: 0%](https://img.shields.io/badge/Telemetry-0%25%20(100%25%20Private)-brightgreen?style=for-the-badge&logo=shield&logoColor=white)](https://github.com/RitualDev-Lab/localrag-kit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![Featured on DevShelf](https://img.shields.io/badge/Featured%20on-DevShelf-7928CA?style=for-the-badge&logo=googlechrome&logoColor=white)](https://ritualdev-lab.github.io/DevShelf/)
 
-*Zero cloud vector database fees. Zero telemetry. Zero data leaks.*  
-*Indexes your repositories, PDFs, and docs into a single portable SQLite database with hybrid BM25 + dense vector search and an interactive local web UI.*
+<p align="center">
+  <a href="#-quick-start"><b>⚡ Quick Start</b></a> •
+  <a href="#-why-localrag-kit-comparison"><b>⚖️ Why LocalRAG-Kit</b></a> •
+  <a href="#-features"><b>✨ Features</b></a> •
+  <a href="#-system-architecture"><b>🏛️ Architecture</b></a> •
+  <a href="#-web-ui-preview"><b>🖥️ Web UI</b></a>
+</p>
+
+---
 
 </div>
+
+## ⚖️ Why LocalRAG-Kit? (Comparison)
+
+Stop paying monthly subscriptions for Pinecone or fighting dependency hell in LangChain. LocalRAG-Kit bundles full hybrid RAG into a single zero-dependency SQLite file:
+
+| Feature | ⚡ LocalRAG-Kit | LangChain / LlamaIndex | Pinecone / Cloud Vectors |
+|---|:---:|:---:|:---:|
+| **Monthly Cost** | <b>$0 Forever</b> | $0 (code) + Cloud bills | $70 - $500+/mo |
+| **Privacy & Security** | <b>🛡️ 100% Air-Gapped / Local-First</b> | ⚠️ Defaults to cloud LLMs | ❌ Code sent to 3rd party cloud |
+| **Setup & Dependencies** | <b>✅ 1-Line Install (`pip install -e .`)</b> | ❌ Heavy dependency conflicts | ❌ Requires API keys & infra |
+| **Hybrid Search (RRF)** | <b>✅ Exact BM25 + Cosine Vector Fusion</b> | ⚠️ Complex multi-retriever | ❌ Vector-only by default |
+| **Code Structure Chunking** | <b>✅ AST syntax-aware for 8+ languages</b> | ⚠️ Naive character splits | ❌ No chunking included |
+| **Built-in Local Web UI** | <b>✅ Instant Tailwind Dark UI included</b> | ❌ None (build yourself) | ❌ None |
+| **Storage Portability** | <b>✅ Single portable `.db` file</b> | ❌ Requires external DBs | ❌ Closed proprietary SaaS |
 
 ---
 
