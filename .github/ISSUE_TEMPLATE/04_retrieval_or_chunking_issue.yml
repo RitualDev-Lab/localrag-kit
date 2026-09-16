@@ -1,0 +1,35 @@
+name: ?? Retrieval, Ranking or Chunking Anomaly
+description: Report an issue where code boundaries were sliced incorrectly or RRF hybrid search missed a relevant chunk
+title: "[Retrieval Anomaly]: <Query or file type>"
+labels: ["retrieval", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### ?? RRF & Boundary Chunking Anomaly Report
+        Help us optimize SQLite FTS5 BM25 + Vector fusion by reporting edge cases where expected chunks were not retrieved or boundary splitters broke syntax.
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Subsystem Observed
+      options:
+        - Code Boundary Chunker (Python, TS, Go, Rust, etc.)
+        - Markdown Heading Chunker (#, ##, code blocks split)
+        - PDF / Text Sliding Window Chunker
+        - RRF Hybrid Search (BM25 vs Dense Cosine balance)
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Sample Code / Document Snippet
+      placeholder: Paste the markdown or code structure that was chunked poorly.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs Actual Chunks / Ranking
+      placeholder: What chunk should have been returned and what did localrag actually rank highest?
+    validations:
+      required: true

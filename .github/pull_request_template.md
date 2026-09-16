@@ -1,41 +1,42 @@
-## Description
+## ?? Summary of Changes
 
-Closes #(issue)
-
-Please provide a concise summary of the changes proposed in this pull request and the rationale behind them.
+<!-- Provide a concise summary of the problem solved or feature added -->
 
 ---
 
-## Type of Change
+## ?? Subsystems Affected
 
-- [ ] 🐛 Bug fix (non-breaking change fixing an issue)
-- [ ] ✨ New feature (non-breaking change adding functionality)
-- [ ] ⚡ Performance improvement
-- [ ] ♻️ Refactoring / Code cleanup
-- [ ] 📝 Documentation update
-- [ ] 🧪 Test coverage addition
-
----
-
-## Changes Made
-
--
--
--
+- [ ] `localrag.indexer` (Document harvesting, boundary chunking)
+- [ ] `localrag.storage` (SQLite schemas, FTS5 BM25, vector BLOBs)
+- [ ] `localrag.retrieval` (Dense cosine similarity, Reciprocal Rank Fusion)
+- [ ] `localrag.providers` (Ollama, OpenAI, feature hasher embeddings)
+- [ ] `localrag.server` / Web UI (FastAPI, SSE streaming, citation drawer)
+- [ ] `localrag.cli` (Rich terminal interface, query commands)
+- [ ] Documentation / Tests
 
 ---
 
-## Local Verification & Testing
+## ?? Type of Change
 
-- [ ] All existing and new tests pass locally (`pytest -v`).
-- [ ] Code formatting and linting pass (`ruff check .` / `black --check .`).
-- [ ] Verified that **no remote API calls or telemetry** are introduced.
-- [ ] Tested on sample documents (PDF / Markdown / Code files).
+- [ ] ?? **Bug Fix** (non-breaking fix)
+- [ ] ? **New Feature** (new file parser, embedding provider, UI component)
+- [ ] ? **Performance Improvement** (SIMD vector operations, batching)
+- [ ] ??? **Security / Privacy Hardening**
+- [ ] ?? **Tests Added / Updated**
+- [ ] ?? **Documentation Update**
 
 ---
 
-## Checklist
+## ?? Verification & Air-Gapped Checklist
 
-- [ ] My code follows the project's coding guidelines.
-- [ ] I have updated corresponding documentation where applicable.
-- [ ] I have added tests that prove my fix is effective or that my feature works.
+- [ ] **Tests Passing**: Ran `pytest tests/` locally and all tests passed.
+- [ ] **Zero Telemetry**: Confirmed that no external tracking or outbound cloud requests are introduced.
+- [ ] **SQL Parameterization**: All SQLite and FTS5 queries use parameterized inputs (`?`).
+- [ ] **Code Formatting**: Passes formatting with `ruff check .` / `black --check .`.
+- [ ] **Documentation**: Updated CLI usage and function docstrings where applicable.
+
+---
+
+## ?? Demonstration / Terminal Output (if applicable)
+
+<!-- Attach screenshot of the Web UI or CLI output -->
