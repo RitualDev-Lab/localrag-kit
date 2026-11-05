@@ -12,10 +12,19 @@ license = "MIT"
 authors = [
     { name = "RitualDev Lab", email = "dev@ritualdev.com" },
 ]
-keywords = ["rag", "llm", "local-first", "offline", "search", "sqlite-vec", "embeddings", "ai"]
+keywords = ["local-rag",
+    "offline-rag",
+    "private-ai",
+    "sqlite-vec",
+    "document-search",
+    "codebase-rag",
+    "local-embeddings",
+    "privacy-first"]
+
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -25,6 +34,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Indexing",
 ]
 dependencies = [
     "pydantic>=2.0.0",
