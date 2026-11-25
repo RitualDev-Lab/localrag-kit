@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
-    { name = "RitualDev Lab", email = "dev@ritualdev.com" },
+    { name = "RitualDev Lab", email = "developer@ritualdev.in" },
 ]
 keywords = ["local-rag",
     "offline-rag",
@@ -35,6 +35,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing :: Indexing",
+    "Typing :: Typed",
 ]
 dependencies = [
     "pydantic>=2.0.0",
@@ -55,6 +56,13 @@ dev = [
 
 [project.scripts]
 localrag = "localrag.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/RitualDev-Lab/localrag-kit"
+Documentation = "https://github.com/RitualDev-Lab/localrag-kit#readme"
+Repository = "https://github.com/RitualDev-Lab/localrag-kit"
+Issues = "https://github.com/RitualDev-Lab/localrag-kit/issues"
+Changelog = "https://github.com/RitualDev-Lab/localrag-kit/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["localrag"]
